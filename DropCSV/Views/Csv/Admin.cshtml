@@ -1,0 +1,143 @@
+@model List<DropCSV.Services.MalwareAlertDto>
+
+@{
+    ViewData["Title"] = "Admin Security Dashboard";
+}
+
+@functions {
+    string FormatSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{(bytes / 1024.0):F1} KB";
+        return $"{(bytes / (1024.0 * 1024.0)):F2} MB";
+    }
+}
+
+<div class="row justify-content-center g-4">
+    <div class="col-12 col-xl-10">
+
+        <!-- ── Header ── -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <div style="width:38px;height:38px;background:linear-gradient(135deg,#ff4d6a,#ff758c);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-shield-lock text-white" style="font-size:1.1rem;"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-700">Security Control Center</h5>
+                    <p class="mb-0" style="font-size:0.8rem;color:var(--text-muted);">Monitor and manage ClamAV malware alerts</p>
+                </div>
+            </div>
+
+            @if (Model.Any())
+            {
+                <form asp-action="ClearAlerts" method="post" onsubmit="return confirm('Are you sure you want to delete all security alert history?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-shield-slash me-1"></i>Clear Alert Logs
+                    </button>
+                </form>
+            }
+        </div>
+
+        <!-- ── Stats Overview ── -->
+        <div class="row g-3 mb-4">
+            <!-- Stat 1: Total Alerts -->
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="card p-3 d-flex flex-row align-items-center gap-3">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,77,106,0.1);color:#ff4d6a;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+                        <i class="bi bi-bug"></i>
+                    </div>
+                    <div>
+                        <span class="small" style="color:var(--text-muted);">Blocked Threats</span>
+                        <h4 class="mb-0 fw-700">@Model.Count</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stat 2: Latest Incident -->
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="card p-3 d-flex flex-row align-items-center gap-3">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(108,99,255,0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div>
+                        <span class="small" style="color:var(--text-muted);">Latest Incident</span>
+                        <h6 class="mb-0 fw-600" style="font-size: 0.9rem;">
+                            @(Model.Any() ? Model.First().DetectedAt.ToString("MM-dd HH:mm:ss") : "No alerts")
+                        </h6>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stat 3: Scanner Status -->
+            <div class="col-12 col-md-4">
+                <div class="card p-3 d-flex flex-row align-items-center gap-3">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(72,199,116,0.1);color:#48c774;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <div>
+                        <span class="small" style="color:var(--text-muted);">Scanner (ClamAV)</span>
+                        <h6 class="mb-0 fw-700" style="color:#48c774;">
+                            <i class="bi bi-check-circle-fill me-1"></i>ONLINE
+                        </h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Alerts Table Card ── -->
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-list-task" style="color:var(--accent-danger);"></i>
+                <span class="fw-600">Malware Alert History Logs</span>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-bordered mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width:60px;">ID</th>
+                                    <th>File Name</th>
+                                    <th style="width:120px;">File Size</th>
+                                    <th>Detected Threat</th>
+                                    <th style="width:180px;">Detection Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var alert in Model)
+                                {
+                                    <tr>
+                                        <td class="text-center text-muted small">@alert.Id</td>
+                                        <td class="fw-500"><i class="bi bi-file-earmark-bar-graph me-2"></i>@alert.Filename</td>
+                                        <td>@FormatSize(alert.FileSizeBytes)</td>
+                                        <td>
+                                            <span class="badge bg-danger px-2.5 py-1.5" style="background:#ff4d6a!important; font-weight:600; font-size:0.75rem;">
+                                                <i class="bi bi-virus me-1"></i>@alert.ThreatName
+                                            </span>
+                                        </td>
+                                        <td class="text-muted small">@alert.DetectedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-bug text-muted d-block mb-3" style="font-size:3.5rem; opacity: 0.35;"></i>
+                        <h6 class="fw-600 text-muted">All Clear! No Malware Alerts</h6>
+                        <p class="text-muted mx-auto mb-0" style="max-width:420px; font-size:0.85rem;">
+                            No files containing potential malware threats have been blocked. ClamAV is listening and will record any security threats blocked in the future.
+                        </p>
+                    </div>
+                }
+            </div>
+            <div class="card-footer px-3 py-2 text-muted small" style="font-size: 0.8rem;">
+                MySQL Database Log: <code class="text-accent-danger">dropcsv_db.malware_alerts</code>
+            </div>
+        </div>
+
+    </div>
+</div>

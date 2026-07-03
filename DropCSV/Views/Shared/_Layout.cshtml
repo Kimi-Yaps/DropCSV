@@ -17,7 +17,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark">
             <div class="container-fluid px-4">
-                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Csv" asp-action="Upload">
                     <div style="width:30px;height:30px;background:linear-gradient(135deg,#6c63ff,#48c774);border-radius:8px;display:flex;align-items:center;justify-content:center;">
                         <i class="bi bi-filetype-csv text-white" style="font-size:0.85rem;"></i>
                     </div>
@@ -30,18 +30,23 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1 gap-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="bi bi-house me-1"></i>Home
+                            <a class="nav-link" asp-controller="Csv" asp-action="Upload">
+                                <i class="bi bi-cloud-arrow-up me-1"></i>Upload CSV
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Csv" asp-action="Upload">
-                                <i class="bi bi-table me-1"></i>Drop CSV
+                            <a class="nav-link" asp-controller="Csv" asp-action="Saved">
+                                <i class="bi bi-database me-1"></i>Saved Data
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Csv" asp-action="Admin">
+                                <i class="bi bi-shield-lock me-1"></i>Admin Dashboard
                             </a>
                         </li>
                     </ul>
                     <span class="navbar-text small" style="color:var(--text-muted);">
-                        <i class="bi bi-shield-check me-1" style="color:var(--accent2);"></i>Upload · Validate · Edit
+                        <i class="bi bi-shield-check me-1" style="color:var(--accent2);"></i>Secure Malware Scan Active
                     </span>
                 </div>
             </div>

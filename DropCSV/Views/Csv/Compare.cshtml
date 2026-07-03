@@ -1,0 +1,294 @@
+@model CompareViewModel
+
+@{
+    ViewData["Title"] = "Resolve Duplicates";
+}
+
+<div class="row justify-content-center g-4">
+    <div class="col-12 col-xl-11">
+
+        <!-- ── Title Block ── -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <div style="width:38px;height:38px;background:linear-gradient(135deg,#e8930a,#5b4ef0);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-exclamation-triangle text-white" style="font-size:1.1rem;"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-700">Duplicate Resolution Hub</h5>
+                    <p class="mb-0 text-muted" style="font-size:0.8rem;">
+                        Review duplicates and select which records to import into the database.
+                    </p>
+                </div>
+            </div>
+            <a asp-action="Upload" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Cancel &amp; Re-upload
+            </a>
+        </div>
+
+        <!-- ── Stats Summary ── -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+                <div class="card p-3 d-flex flex-row align-items-center gap-3" style="border-left: 4px solid var(--accent2);">
+                    <div style="font-size:2rem;color:var(--accent2);"><i class="bi bi-check-circle"></i></div>
+                    <div>
+                        <h6 class="mb-0 fw-700 text-uppercase small text-muted">Auto-approved Records</h6>
+                        <h4 class="mb-0 fw-700">@Model.NonDuplicates.Count <span style="font-size:0.85rem;color:var(--text-muted);font-weight:normal;">unique rows will be saved</span></h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card p-3 d-flex flex-row align-items-center gap-3" style="border-left: 4px solid var(--accent-warn);">
+                    <div style="font-size:2rem;color:var(--accent-warn);"><i class="bi bi-exclamation-circle"></i></div>
+                    <div>
+                        <h6 class="mb-0 fw-700 text-uppercase small text-muted">Duplicate Groups Detected</h6>
+                        <h4 class="mb-0 fw-700">@Model.DuplicateGroups.Count <span style="font-size:0.85rem;color:var(--text-muted);font-weight:normal;">groups require attention</span></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Configuration Card (Compare Keys Selector) ── -->
+        <div class="card mb-4">
+            <div class="card-header bg-light py-3">
+                <h6 class="mb-0 fw-600"><i class="bi bi-gear-fill me-2 text-muted"></i>Duplicate Matching Rules</h6>
+            </div>
+            <div class="card-body p-4">
+                <p class="small text-muted mb-3">
+                    Select the columns to match by. Two rows are considered duplicates if they have identical values in all selected columns. (By default, all columns are compared).
+                </p>
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    @foreach (var col in Model.AvailableColumns)
+                    {
+                        <div class="form-check form-check-inline p-2 border rounded cursor-pointer @(Model.SelectedCompareColumns.Contains(col) ? "border-primary" : "border-light")" 
+                             style="background: var(--bg-card2); transition: var(--transition);"
+                             onclick="toggleCheck('col_@col')">
+                            <input class="form-check-input col-select" type="checkbox" value="@col" id="col_@col" 
+                                   @(Model.SelectedCompareColumns.Contains(col) ? "checked" : "") onclick="event.stopPropagation(); updateBorder(this);" />
+                            <label class="form-check-label fw-500 cursor-pointer" for="col_@col" onclick="event.stopPropagation();">@col</label>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-xs btn-outline-secondary" onclick="selectCompareColumns('all')">Select All</button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary" onclick="selectCompareColumns('none')">Clear All</button>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="recalculate()">
+                        <i class="bi bi-arrow-repeat me-1"></i>Recalculate Duplicates
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Duplicate Groups Listing ── -->
+        @if (Model.DuplicateGroups.Any())
+        {
+            <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2 small">
+                <i class="bi bi-info-circle-fill" style="color:var(--accent-info);"></i>
+                <span>Use checkboxes next to each row to select which records to <b>KEEP</b>. Diselected rows will be discarded.</span>
+            </div>
+
+            @for (int g = 0; g < Model.DuplicateGroups.Count; g++)
+            {
+                var group = Model.DuplicateGroups[g];
+                <div class="card mb-4 shadow-sm border-warning" style="border-left: 5px solid var(--accent-warn);">
+                    <div class="card-header d-flex flex-wrap align-items-center justify-content-between py-2 px-3" style="background:rgba(232,147,10,0.06);">
+                        <span class="fw-700 text-uppercase small" style="color:var(--accent-warn);">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Duplicate Group #@(g + 1)
+                        </span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-xs btn-outline-primary" onclick="setGroupCheckboxes(@g, 'Upload')">Keep All Uploaded</button>
+                            @if (Model.UploadMode == "merge")
+                            {
+                                <button class="btn btn-xs btn-outline-info" onclick="setGroupCheckboxes(@g, 'Database')">Keep All Database</button>
+                            }
+                            <button class="btn btn-xs btn-outline-success" onclick="setGroupCheckboxes(@g, 'both')">Keep Both</button>
+                            <button class="btn btn-xs btn-outline-danger" onclick="setGroupCheckboxes(@g, 'none')">Discard Both</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0 align-middle" style="font-size:0.9rem;">
+                                <thead class="table-light text-muted small">
+                                    <tr>
+                                        <th class="text-center" style="width:70px;">Keep</th>
+                                        <th style="width:120px;">Source</th>
+                                        @foreach (var header in Model.Headers)
+                                        {
+                                            <th>@header</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in group.Items)
+                                    {
+                                        <tr class="group-row-@g" data-source="@item.Source" data-index="@item.OriginalIndex">
+                                            <!-- Checkbox to Keep -->
+                                            <td class="text-center">
+                                                <input class="form-check-input row-keep-cb" type="checkbox" checked 
+                                                       data-source="@item.Source" data-index="@item.OriginalIndex" />
+                                            </td>
+                                            <!-- Source Label -->
+                                            <td>
+                                                @if (item.Source == "Database")
+                                                {
+                                                    <span class="badge" style="background:rgba(2,132,199,0.18);color:var(--accent-info);">
+                                                        <i class="bi bi-database me-1"></i>Database
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge" style="background:rgba(91,78,240,0.18);color:var(--accent);">
+                                                        <i class="bi bi-file-earmark-arrow-up me-1"></i>Uploaded File
+                                                    </span>
+                                                }
+                                            </td>
+                                            <!-- Data Columns -->
+                                            @foreach (var cell in item.RowData)
+                                            {
+                                                <td>@cell</td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- ── Submit Block ── -->
+            <div class="card mt-4 p-4 text-center">
+                <h5 class="fw-700 mb-2">Resolve and Finalize</h5>
+                <p class="text-muted small mx-auto mb-3" style="max-width:550px;">
+                    Review your choices above. Once confirmed, all auto-approved unique records and your selected duplicate rows will be combined and saved to the database.
+                </p>
+                <div>
+                    <button class="btn btn-success py-2 px-5 fw-600 shadow-sm" onclick="submitResolution()">
+                        <i class="bi bi-check-circle-fill me-2"></i>Confirm &amp; Import resolved CSV
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card text-center py-5">
+                <div class="card-body">
+                    <i class="bi bi-check-circle text-success d-block mb-3" style="font-size:3.5rem;"></i>
+                    <h5 class="fw-700">No Duplicates Found</h5>
+                    <p class="text-muted small mx-auto mb-3" style="max-width:400px;">
+                        There are no duplicate records in the CSV based on the selected matching rules.
+                    </p>
+                    <button class="btn btn-primary" onclick="submitResolution()">
+                        <i class="bi bi-cloud-upload me-2"></i>Import All Rows Now
+                    </button>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    // Recalculate duplicates based on selected columns
+    function recalculate() {
+        const checked = Array.from(document.querySelectorAll('.col-select:checked')).map(cb => cb.value);
+        const url = '@Url.Action("Compare", "Csv")?compareCols=' + encodeURIComponent(checked.join(','));
+        window.location.href = url;
+    }
+
+    function toggleCheck(id) {
+        const cb = document.getElementById(id);
+        if (cb) {
+            cb.checked = !cb.checked;
+            updateBorder(cb);
+        }
+    }
+
+    function updateBorder(cb) {
+        const div = cb.closest('.form-check');
+        if (div) {
+            if (cb.checked) {
+                div.classList.remove('border-light');
+                div.classList.add('border-primary');
+            } else {
+                div.classList.remove('border-primary');
+                div.classList.add('border-light');
+            }
+        }
+    }
+
+    function selectCompareColumns(mode) {
+        document.querySelectorAll('.col-select').forEach(cb => {
+            cb.checked = (mode === 'all');
+            updateBorder(cb);
+        });
+    }
+
+    // Set checkboxes in a group
+    function setGroupCheckboxes(groupId, mode) {
+        const trs = document.querySelectorAll('.group-row-' + groupId);
+        trs.forEach(tr => {
+            const cb = tr.querySelector('.row-keep-cb');
+            if (cb) {
+                const source = tr.dataset.source;
+                if (mode === 'both') {
+                    cb.checked = true;
+                } else if (mode === 'none') {
+                    cb.checked = false;
+                } else {
+                    cb.checked = (source === mode);
+                }
+            }
+        });
+    }
+
+    // Submit selected rows
+    function submitResolution() {
+        const payload = {
+            KeepItems: []
+        };
+
+        // Get all selected checkboxes
+        document.querySelectorAll('.row-keep-cb:checked').forEach(cb => {
+            payload.KeepItems.push({
+                Source: cb.dataset.source,
+                OriginalIndex: parseInt(cb.dataset.index, 10)
+            });
+        });
+
+        // Add matching columns used so server knows
+        payload.CompareColumns = Array.from(document.querySelectorAll('.col-select:checked')).map(cb => cb.value);
+
+        // Fetch post to SaveResolved
+        fetch('@Url.Action("SaveResolved", "Csv")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Failed to save resolved records.');
+        })
+        .then(data => {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            } else {
+                alert('Data saved successfully.');
+                window.location.href = '@Url.Action("Saved", "Csv")';
+            }
+        })
+        .catch(error => {
+            console.error('Error saving resolution:', error);
+            alert('An error occurred while saving selection to MySQL: ' + error.message);
+        });
+    }
+    </script>
+}

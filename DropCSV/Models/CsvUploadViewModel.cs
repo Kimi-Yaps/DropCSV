@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace DropCSV.Models
 {
@@ -12,5 +12,6 @@ namespace DropCSV.Models
         public List<string> Headers { get; set; } = new();
         public List<List<string>> Rows { get; set; } = new();
         public bool HasData => Headers.Any();
+        public string UploadMode { get; set; } = "merge"; // "merge" or "replace"
     }
 }

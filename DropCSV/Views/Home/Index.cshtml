@@ -1,8 +1,136 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Portfolio Showcase";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+
+        <!-- Hero Section -->
+        <div class="card border-0 overflow-hidden mb-5 position-relative shadow" 
+             style="background: linear-gradient(135deg, rgba(91,78,240,0.08) 0%, rgba(2,132,199,0.06) 100%); border-radius: var(--radius);">
+            <div class="card-body p-5 text-center position-relative z-index-1">
+                <div class="badge mb-3 py-2 px-3 text-uppercase fw-700 tracking-wide" 
+                     style="background:var(--accent-light); color:var(--accent); font-size:0.75rem;">
+                    Portfolio Case Study
+                </div>
+                <h1 class="display-5 fw-800 mb-3" style="letter-spacing: -1px; background: linear-gradient(135deg, var(--accent), var(--accent-info)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    DropCSV Portfolio Project
+                </h1>
+                <p class="lead text-muted mx-auto mb-4" style="max-width:700px; font-size:1.1rem; font-weight:400; line-height:1.6;">
+                    An advanced, secure CSV ingestion and management engine. This application demonstrates robust file validation, server-side malware scanning, duplicate data resolution, and interactive database CRUD.
+                </p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a asp-controller="Csv" asp-action="Upload" class="btn btn-primary px-4 py-2.5 fw-600 shadow-sm">
+                        <i class="bi bi-cloud-arrow-up me-2"></i>Upload CSV
+                    </a>
+                    <a asp-controller="Csv" asp-action="Saved" class="btn btn-outline-secondary px-4 py-2.5 fw-600">
+                        <i class="bi bi-database me-2"></i>View Database
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Highlights -->
+        <h4 class="fw-800 mb-4 text-center">Core Technical Capabilities</h4>
+        <div class="row g-4 mb-5">
+            <!-- Col 1 -->
+            <div class="col-12 col-md-6">
+                <div class="card h-100 shadow-sm border-0 p-3" style="transition: transform var(--transition); border-radius:var(--radius);">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="rounded-3 p-2" style="background:var(--accent-danger-light); color:var(--accent-danger); font-size:1.5rem;">
+                                <i class="bi bi-shield-slash"></i>
+                            </div>
+                            <h5 class="mb-0 fw-700">Security &amp; Malware Defense</h5>
+                        </div>
+                        <p class="text-muted small" style="line-height:1.5;">
+                            Integrates ClamAV API to scan files prior to ingestion. Features "fail-closed" error behaviors and triggers database alert logging for security violations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col 2 -->
+            <div class="col-12 col-md-6">
+                <div class="card h-100 shadow-sm border-0 p-3" style="transition: transform var(--transition); border-radius:var(--radius);">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="rounded-3 p-2" style="background:var(--accent-warn-light); color:var(--accent-warn); font-size:1.5rem;">
+                                <i class="bi bi-intersect"></i>
+                            </div>
+                            <h5 class="mb-0 fw-700">Smart Duplicate Resolution</h5>
+                        </div>
+                        <p class="text-muted small" style="line-height:1.5;">
+                            Checks uploaded CSV rows against current database records. Uses configurable matching columns to detect conflicts and renders a side-by-side comparison screen to resolve duplicates.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col 3 -->
+            <div class="col-12 col-md-6">
+                <div class="card h-100 shadow-sm border-0 p-3" style="transition: transform var(--transition); border-radius:var(--radius);">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="rounded-3 p-2" style="background:var(--accent-light); color:var(--accent); font-size:1.5rem;">
+                                <i class="bi bi-database-check"></i>
+                            </div>
+                            <h5 class="mb-0 fw-700">Real-Time Database CRUD</h5>
+                        </div>
+                        <p class="text-muted small" style="line-height:1.5;">
+                            Provides an interactive dashboard to perform Create, Read, Update, and Delete operations on the MySQL database dataset. Features inline contenteditable editors and bulk deletions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col 4 -->
+            <div class="col-12 col-md-6">
+                <div class="card h-100 shadow-sm border-0 p-3" style="transition: transform var(--transition); border-radius:var(--radius);">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="rounded-3 p-2" style="background:var(--accent-info-light); color:var(--accent-info); font-size:1.5rem;">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                            <h5 class="mb-0 fw-700">Rich Aesthetics &amp; Search</h5>
+                        </div>
+                        <p class="text-muted small" style="line-height:1.5;">
+                            Utilizes CSS3 variables for a cohesive theme. Features instant client-side global searches, column-specific filters, keyboard arrow row navigation, and inline date validation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Architecture & Tech Stack -->
+        <div class="card border-0 shadow-sm p-4 mb-5" style="border-radius: var(--radius); background: var(--bg-card);">
+            <div class="card-body">
+                <h5 class="fw-800 mb-3"><i class="bi bi-cpu me-2 text-accent"></i>Portfolio Tech Stack</h5>
+                <p class="text-muted small mb-4">
+                    This project is engineered using a modern architecture separating database persistence, stream validations, and dynamic UI interactions:
+                </p>
+                <div class="row g-3 text-muted small">
+                    <div class="col-6 col-md-4">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i><strong>ASP.NET Core MVC</strong> (C#)
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i><strong>MySQL Connector</strong> (Dapper/Raw)
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i><strong>ClamAV Client</strong> (TCP API)
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i><strong>CSV Helper Library</strong>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i><strong>JavaScript Fetch API</strong>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i><strong>Bootstrap 5 &amp; CSS3</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
